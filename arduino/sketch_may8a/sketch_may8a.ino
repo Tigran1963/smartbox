@@ -117,6 +117,6 @@ void loop()
   message_characteristic->notify();
   Serial.println(cars);
 
-  delay(1000);
+  delay(10000);
 
 }
