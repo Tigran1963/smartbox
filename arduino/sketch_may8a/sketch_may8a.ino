@@ -2,6 +2,16 @@
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
+#include <string.h>
+
+
+struct Car{
+  int id;
+  String brand;
+  String model;
+  String color;
+  int year;
+};
 
 // BLE SECTION
 BLEServer *pServer = NULL;
@@ -101,11 +111,11 @@ void setup(){
 
 void loop()
 {
-  int stepCount = random(30);
-  String stepData = String(stepCount);
+  String cars = "1|Toyota|Camry|Black|2020#2|Empty";
+  String stepData = String(cars);
   message_characteristic->setValue(stepData.c_str());
   message_characteristic->notify();
-  Serial.println(stepCount);
+  Serial.println(cars);
 
   delay(1000);
 

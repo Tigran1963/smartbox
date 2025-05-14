@@ -45,7 +45,7 @@ const ThemeContext = createContext();
 const BluetoothContext = createContext();
 const Tab = createBottomTabNavigator();
 const bleManager = new BleManager();
-
+let TEST = '';
 const carData = [
 	{ id: "1", brand: "Toyota", model: "Camry", color: "Белый", image: "https://via.placeholder.com/150", year: 2020 },
 	{ id: "2", brand: "BMW", model: "X5", color: "Чёрный", image: "https://via.placeholder.com/150", year: 2019 },
@@ -55,8 +55,102 @@ const BluetoothProvider = ({ children }) => {
 	const [device, setDevice] = useState(null);
 	const [isConnected, setIsConnected] = useState(false);
 	const [receivedData, setReceivedData] = useState("");
+
+	// const monitorCharacteristic = useCallback(async (serviceUUID, characteristicUUID, callback) => {
+	// 	if (!device || !device.isConnected) {
+	// 		console.warn("Устройство не подключено");
+	// 		return;
+	// 	}
+	// 	try {
+	// 		console.log(`Starting monitoring for ${serviceUUID}/${characteristicUUID}`);
+	// 		const subscription = device.monitorCharacteristicForService(
+	// 			serviceUUID,
+	// 			characteristicUUID,
+	// 			(error, characteristic) => {
+	// 				if (error) {
+	// 					console.error("Ошибка мониторинга:", error);
+	// 					return;
+	// 				}
+	// 				if (!characteristic?.value) {
+	// 					console.log("Нет данных в характеристике");
+	// 					return;
+	// 				}
+	// 				try {
+	// 					const decodedValue = atob(characteristic.value);
+	// 					console.log("Получены данные:", decodedValue);
+	// 					setReceivedData(decodedValue);
+	// 					if (callback) callback(decodedValue);
+	// 				} catch (decodeError) {
+	// 					console.error("Ошибка декодирования:", decodeError);
+	// 				}
+	// 			}
+	// 		);
+	// 		return () => {
+	// 			console.log("Отмена мониторинга характеристики");
+	// 			subscription.remove();
+	// 		};
+	// 	} catch (error) {
+	// 		console.error("Ошибка при запуске мониторинга:", error);
+	// 	}
+	// }, [device]);
+	// Функция для записи в характеристику
+
+	const writeCharacteristic = useCallback(async (serviceUUID, characteristicUUID, data) => {
+		if (!device || !device.isConnected) {
+			console.warn("Устройство не подключено");
+			return false;
+		}
+		try {
+			const base64Data = btoa(String(data));
+			await device.writeCharacteristicWithResponseForService(
+				serviceUUID,
+				characteristicUUID,
+				base64Data
+			);
+			return true;
+		} catch (error) {
+			console.error("Ошибка записи:", error);
+			return false;
+		}
+	}, [device]);
+
+	// Функция для отправки данных
+	const sendData = useCallback(async (data) => {
+		return writeCharacteristic(ESP32_SERVICE_UUID, SEND_CAR_DATA_CHARACTERISTIC, data);
+	}, [writeCharacteristic]);
+
+	// const receiveData = useCallback((callback) => {
+	// 	return monitorCharacteristic(ESP32_SERVICE_UUID, RECIVE_SLOT_CHARACTERISTIC, callback);
+	// }, [monitorCharacteristic]);
+
+	// Значение контекста
+	const value = {
+		device,
+		isConnected,
+		receivedData,
+		setDevice,
+		setIsConnected,
+		//monitorCharacteristic,
+		writeCharacteristic,
+		sendData,
+		//receiveData
+	};
+	return (
+		<BluetoothContext.Provider value={value}>
+			{children}
+		</BluetoothContext.Provider>
+	);
+};
+
+const BluetoothConnectionScreen = ({ onConnected }) => {
 	const [isConnecting, setIsConnecting] = useState(false);
 	const [status, setStatus] = useState("Нажмите для подключения");
+	const { isDarkTheme } = useContext(ThemeContext);
+	const {
+		device,
+		setDevice,
+		setIsConnected,
+	} = useContext(BluetoothContext);
 
 	const requestPermissions = async () => {
 		try {
@@ -97,6 +191,7 @@ const BluetoothProvider = ({ children }) => {
 			return false;
 		}
 	};
+	requestPermissions();
 
 	const connectToDevice = async () => {
 		const hasPermissions = await requestPermissions();
@@ -104,11 +199,9 @@ const BluetoothProvider = ({ children }) => {
 			setStatus("Необходимы разрешения для Bluetooth");
 			return;
 		}
-
-		setIsConnecting(true);
-		setStatus("Поиск устройства...");
-
 		bleManager.startDeviceScan(null, null, (error, device) => {
+			setIsConnecting(true);
+			setStatus("Поиск устройства...");
 			if (error) {
 				console.log("Ошибка: " + error.message);
 				setStatus("Включите Bluetooth");
@@ -116,21 +209,21 @@ const BluetoothProvider = ({ children }) => {
 				setIsConnected(false);
 				return;
 			}
-
 			if (device.name === DEVICE_NAME) {
 				bleManager.stopDeviceScan();
 				setStatus("Подключение к ESP32...");
-
 				device.connect()
 					.then((connectedDevice) => {
-						return connectedDevice.requestMTU(500)
-							.then(() => connectedDevice.discoverAllServicesAndCharacteristics());
+						connectedDevice.requestMTU(500)
+						return connectedDevice.discoverAllServicesAndCharacteristics();
 					})
 					.then((connectedDevice) => {
 						setDevice(connectedDevice);
 						setIsConnected(true);
 						setStatus("Подключено!");
-						monitorDeviceCharacteristics(connectedDevice);
+						setTimeout(() => {
+							onConnected(connectedDevice);
+						}, 1000);
 					})
 					.catch((error) => {
 						setStatus("Ошибка подключения: " + error.message);
@@ -140,119 +233,74 @@ const BluetoothProvider = ({ children }) => {
 			}
 		});
 	};
+	useEffect(() => {
+      if (!device) {
+        return;
+      }
 
-	const monitorDeviceCharacteristics = (device) => {
-		const subscription = device.monitorCharacteristicForService(
+      const subscription = bleManager.onDeviceDisconnected(
+        device.id,
+        (error, device) => {
+          if (error) {
+            console.log("Disconnected with error:", error);
+          }
+          setConnectionStatus("Disconnected");
+          setIsConnected(false);
+          console.log("Disconnected device");
+          if (device) {
+            setConnectionStatus("Reconnecting...");
+            connectToDevice(device)
+              .then(() => {
+                setConnectionStatus("Connected");
+                setIsConnected(true);
+              })
+              .catch((error) => {
+                console.log("Reconnection failed: ", error);
+                setConnectionStatus("Reconnection failed");
+                setIsConnected(false);
+                setDevice(null);
+              });
+          }
+        }
+      );
+
+      return () => subscription.remove();
+    }, [device]);
+
+	useEffect(() => {
+		console.log("device", device)
+		if (!device || !device.isConnected) {
+			return
+		}
+		const sub = device.monitorCharacteristicForService(
 			ESP32_SERVICE_UUID,
 			RECIVE_SLOT_CHARACTERISTIC,
 			(error, char) => {
-				if (error) {
-					console.error("Monitoring error:", error);
+				console.log("char", char)
+				if (error || !char) {
 					return;
 				}
-
-				if (!char?.value) return;
-
-				try {
-					const rawValue = atob(char.value);
-					setReceivedData(rawValue);
-					console.log("Received data:", rawValue);
-				} catch (decodeError) {
-					console.error("Error decoding data:", decodeError);
-				}
+				const rawValue = atob(char?.value ?? "");
+				TEST = rawValue
+				console.log("rawvalue", rawValue, typeof rawValue)
 			}
-		);
+		)
+		return () => sub.remove()
+	}, [device])
 
-		return subscription;
-	};
-
-	useEffect(() => {
-		if (!device) return;
-
-		const disconnectSubscription = bleManager.onDeviceDisconnected(device.id, (error) => {
-			if (error) {
-				console.log("Disconnected with error:", error);
-			}
-
-			setStatus("Отключено");
-			setIsConnected(false);
-
-			// Автоматическое переподключение
-			setStatus("Повторное подключение...");
-			connectToDevice();
-		});
-
-		const charSubscription = monitorDeviceCharacteristics(device);
-
-		return () => {
-			disconnectSubscription.remove();
-			charSubscription?.remove();
-		};
-	}, [device]);
-
-	const writeCharacteristic = useCallback(async (serviceUUID, characteristicUUID, data) => {
-		if (!device || !device.isConnected) {
-			console.warn("Устройство не подключено");
-			return false;
-		}
-
-		try {
-			const base64Data = btoa(String(data));
-			await device.writeCharacteristicWithResponseForService(
-				serviceUUID,
-				characteristicUUID,
-				base64Data
-			);
-			return true;
-		} catch (error) {
-			console.error("Ошибка записи:", error);
-			return false;
-		}
-	}, [device]);
-
-	const sendData = useCallback(async (data) => {
-		return writeCharacteristic(ESP32_SERVICE_UUID, SEND_CAR_DATA_CHARACTERISTIC, data);
-	}, [writeCharacteristic]);
-
-	const value = {
-		device,
-		isConnected,
-		isConnecting,
-		receivedData,
-		status,
-		connectToDevice,
-		sendData,
-		writeCharacteristic,
-	};
-
-	return (
-		<BluetoothContext.Provider value={value}>
-			{children}
-		</BluetoothContext.Provider>
-	);
-};
-
-const BluetoothConnectionScreen = () => {
-	const { isDarkTheme } = useContext(ThemeContext);
-	const {
-		status,
-		isConnecting,
-		connectToDevice,
-	} = useContext(BluetoothContext);
 
 	return (
 		<View style={[styles.connectionContainer, isDarkTheme && styles.darkConnectionContainer]}>
 			<Text style={[styles.connectionText, isDarkTheme && styles.darkText]}>
 				{status}
 			</Text>
-			{isConnecting ? (
-				<ActivityIndicator size="large" color="#FF1493" />
-			) : (
+			{isConnecting && <ActivityIndicator size="large" color="#FF1493" />}
+			{!isConnecting && (
 				<TouchableOpacity style={styles.connectButton} onPress={connectToDevice}>
 					<Text style={styles.buttonText}>Подключиться</Text>
 				</TouchableOpacity>
 			)}
-		</View>
+		</View >
 	);
 };
 
@@ -262,6 +310,7 @@ const HomeScreen = () => {
 		sendData,
 		receiveData,
 		receivedData,
+		monitorCharacteristic,
 		isConnected,
 		device,
 		setDevice,
@@ -293,6 +342,21 @@ const HomeScreen = () => {
 			alert(`Ошибка: ${error.message}`);
 		}
 	};
+	const reconnectDevice = async () => {
+		if (!device) {
+			alert("Нет устройства для повторного подключения");
+			return;
+		}
+		try {
+			const connectedDevice = await device.connect();
+			await connectedDevice.discoverAllServicesAndCharacteristics();
+			setDevice(connectedDevice);
+			setIsConnected(true);
+			alert("Успешно переподключено!");
+		} catch (error) {
+			alert(`Ошибка переподключения: ${error.message}`);
+		}
+	};
 	const handleSearch = (text) => {
 		setSearch(text);
 		setFilteredCars(
@@ -316,6 +380,7 @@ const HomeScreen = () => {
 			{!isConnected && (
 				<TouchableOpacity
 					style={styles.reconnectButton}
+					onPress={reconnectDevice}
 				>
 					<Text style={styles.buttonText}>Переподключиться</Text>
 				</TouchableOpacity>
@@ -338,7 +403,7 @@ const HomeScreen = () => {
 						<Image source={{ uri: item.image }} style={styles.carImage} />
 						<View style={styles.carInfo}>
 							<Text style={[styles.text, isDarkTheme && styles.darkText]}>
-								{`${item.brand} ${item.model} - ${item.color}`}
+								{`${item.brand} ${item.model} - ${item.color}, ${TEST}`}
 
 							</Text>
 							<TouchableOpacity
@@ -402,53 +467,48 @@ const SettingsScreen = () => {
 
 export default function App() {
 	const [isDarkTheme, setIsDarkTheme] = useState(false);
+	const [isConnected, setIsConnected] = useState(false);
+	const [showConnectionScreen, setShowConnectionScreen] = useState(true);
+
 	const toggleTheme = () => setIsDarkTheme(prev => !prev);
 
+	const handleConnected = () => {
+		setShowConnectionScreen(false);
+	};
 	return (
 		<ThemeContext.Provider value={{ isDarkTheme, toggleTheme }}>
 			<BluetoothProvider>
-				<MainAppContent />
+				{showConnectionScreen ? (
+					<BluetoothConnectionScreen onConnected={handleConnected} />
+				) : (
+					<NavigationContainer>
+						<Tab.Navigator
+							screenOptions={({ route }) => ({
+								tabBarIcon: ({ focused, color, size }) => {
+									let iconName;
+
+									if (route.name === "Главная") {
+										iconName = focused ? "home" : "home-outline";
+									} else if (route.name === "Настройки") {
+										iconName = focused ? "settings" : "settings-outline";
+									}
+
+									return <Ionicons name={iconName} size={size} color={color} />;
+								},
+								tabBarActiveTintColor: "#FF1493",
+								tabBarInactiveTintColor: "gray",
+							})}
+						>
+							<Tab.Screen name="Главная" component={HomeScreen} />
+							<Tab.Screen name="Настройки" component={SettingsScreen} />
+						</Tab.Navigator>
+					</NavigationContainer>
+				)}
+				<StatusBar style={isDarkTheme ? "light" : "dark"} />
 			</BluetoothProvider>
 		</ThemeContext.Provider>
 	);
 }
-
-const MainAppContent = () => {
-	const { isConnected } = useContext(BluetoothContext);
-	const { isDarkTheme } = useContext(ThemeContext);
-
-	return (
-		<>
-			{!isConnected ? (
-				<BluetoothConnectionScreen />
-			) : (
-				<NavigationContainer>
-					<Tab.Navigator
-						screenOptions={({ route }) => ({
-							tabBarIcon: ({ focused, color, size }) => {
-								let iconName;
-
-								if (route.name === "Главная") {
-									iconName = focused ? "home" : "home-outline";
-								} else if (route.name === "Настройки") {
-									iconName = focused ? "settings" : "settings-outline";
-								}
-
-								return <Ionicons name={iconName} size={size} color={color} />;
-							},
-							tabBarActiveTintColor: "#FF1493",
-							tabBarInactiveTintColor: "gray",
-						})}
-					>
-						<Tab.Screen name="Главная" component={HomeScreen} />
-						<Tab.Screen name="Настройки" component={SettingsScreen} />
-					</Tab.Navigator>
-				</NavigationContainer>
-			)}
-			<StatusBar style={isDarkTheme ? "light" : "dark"} />
-		</>
-	);
-};
 
 const styles = StyleSheet.create({
 	statusContainer: {
