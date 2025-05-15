@@ -86,7 +86,80 @@ const BluetoothProvider = ({ children }) => {
 			return false;
 		}
 	};
+	// const requestPermissions = async () => {
+	// 	try {
+	// 		// Проверяем версию Android
+	// 		const isAndroid12OrHigher = Platform.Version >= 31;
 
+	// 		let permissionsToRequest = [];
+	// 		let permissionRationales = {};
+
+	// 		if (isAndroid12OrHigher) {
+	// 			// Для Android 12+ запрашиваем новые разрешения
+	// 			permissionsToRequest = [
+	// 				PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
+	// 				PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
+	// 				PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+	// 			];
+
+	// 			permissionRationales = {
+	// 				[PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN]: {
+	// 					title: "Bluetooth Scan Permission",
+	// 					message: "App needs Bluetooth scan permission to discover devices",
+	// 					buttonPositive: "OK",
+	// 				},
+	// 				[PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT]: {
+	// 					title: "Bluetooth Connect Permission",
+	// 					message: "App needs Bluetooth connect permission to pair devices",
+	// 					buttonPositive: "OK",
+	// 				},
+	// 				[PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION]: {
+	// 					title: "Location Permission",
+	// 					message: "Bluetooth Low Energy requires Location",
+	// 					buttonPositive: "OK",
+	// 				},
+	// 			};
+	// 		} else {
+	// 			// Для версий ниже Android 12
+	// 			permissionsToRequest = [
+	// 				PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+	// 			];
+
+	// 			permissionRationales = {
+	// 				[PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION]: {
+	// 					title: "Location Permission",
+	// 					message: "Bluetooth Low Energy requires Location",
+	// 					buttonPositive: "OK",
+	// 				},
+	// 			};
+	// 		}
+
+	// 		const result = await PermissionsAndroid.requestMultiple(
+	// 			permissionsToRequest,
+	// 			permissionRationales
+	// 		);
+
+	// 		// Проверяем результаты
+	// 		if (isAndroid12OrHigher) {
+	// 			return (
+	// 				result[PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN] ===
+	// 				PermissionsAndroid.RESULTS.GRANTED &&
+	// 				result[PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT] ===
+	// 				PermissionsAndroid.RESULTS.GRANTED &&
+	// 				result[PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION] ===
+	// 				PermissionsAndroid.RESULTS.GRANTED
+	// 			);
+	// 		} else {
+	// 			return (
+	// 				result[PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION] ===
+	// 				PermissionsAndroid.RESULTS.GRANTED
+	// 			);
+	// 		}
+	// 	} catch (err) {
+	// 		console.warn("Error requesting permissions: ", err);
+	// 		return false;
+	// 	}
+	// };
 	const connectToDevice = async () => {
 		const hasPermissions = await requestPermissions();
 		if (!hasPermissions) {
@@ -154,6 +227,10 @@ const BluetoothProvider = ({ children }) => {
 
 		return subscription;
 	};
+	// Убрать этот useEffect
+	useEffect(() => {
+		setReceivedData("1|Toyota|Camry|Black|2020#2|Empty")
+	}, [])
 
 	useEffect(() => {
 		if (!device) return;
@@ -522,10 +599,10 @@ export default function App() {
 const MainAppContent = () => {
 	const { isConnected } = useContext(BluetoothContext);
 	const { isDarkTheme } = useContext(ThemeContext);
-
+	// Должно быть !isConnected
 	return (
 		<>
-			{!isConnected ? (
+			{isConnected ? (
 				<BluetoothConnectionScreen />
 			) : (
 				<NavigationContainer>
@@ -551,13 +628,11 @@ const MainAppContent = () => {
 					</Tab.Navigator>
 				</NavigationContainer>
 			)}
-			<StatusBar style={isDarkTheme ? "light" : "dark"} />
+			<StatusBar style={"dark"} />
 		</>
 	);
 };
 
-
-// Цветовая палитра
 const COLORS = {
 	primary: '#4B0082',
 	secondary: '#800080',
@@ -574,7 +649,6 @@ const COLORS = {
 	gray: '#CCCCCC',
 	darkGray: '#555',
 };
-
 // Общие стили
 const COMMON = {
 	container: {
@@ -626,11 +700,9 @@ const COMMON = {
 		backgroundColor: COLORS.darkItem,
 	},
 };
-
 const styles = StyleSheet.create({
 	// Основные стили
 	...COMMON,
-
 	// Компоненты
 	modalTitle: {
 		fontSize: 20,
@@ -683,51 +755,43 @@ const styles = StyleSheet.create({
 		width: '100%',
 		gap: 12,
 	},
-
 	// Кнопки
 	saveButton: {
 		...COMMON.button,
 		backgroundColor: COLORS.success,
 		flex: 1,
 	},
-
 	clearButton: {
 		...COMMON.button,
 		backgroundColor: COLORS.warning,
 		flex: 1,
 	},
-
 	closeButton: {
 		...COMMON.button,
 		backgroundColor: COLORS.error,
 		flex: 1,
 	},
-
 	actionButton: {
 		...COMMON.button,
 		minWidth: '30%',
 	},
-
 	sendButton: {
 		...COMMON.button,
 		backgroundColor: COLORS.accent,
 		padding: 8,
 		marginLeft: 10,
 	},
-
 	reconnectButton: {
 		...COMMON.button,
 		backgroundColor: COLORS.reconnect,
 		width: '100%',
 		marginBottom: 12,
 	},
-
 	connectButton: {
 		...COMMON.button,
 		backgroundColor: COLORS.accent,
 		width: '80%',
 	},
-
 	// Элементы списка
 	carItem: {
 		flexDirection: 'row',
@@ -737,25 +801,21 @@ const styles = StyleSheet.create({
 		marginBottom: 12,
 		borderRadius: 10,
 	},
-
 	darkItem: {
 		backgroundColor: COLORS.darkItem,
 	},
-
 	carImage: {
 		width: 50,
 		height: 50,
 		marginRight: 12,
 		borderRadius: 8,
 	},
-
 	carInfo: {
 		flex: 1,
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
 	},
-
 	// Модальные окна
 	modalContainer: {
 		flex: 1,
@@ -763,26 +823,22 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		backgroundColor: 'rgba(0,0,0,0.7)',
 	},
-
 	modalContent: {
 		...COMMON.card,
 		alignItems: 'center',
 		width: '85%',
 	},
-
 	carImageLarge: {
 		width: 200,
 		height: 200,
 		marginBottom: 12,
 		borderRadius: 12,
 	},
-
 	modalText: {
 		fontSize: 18,
 		color: COLORS.lightAccent,
 		marginBottom: 12,
 	},
-
 	// Состояния
 	statusContainer: {
 		...COMMON.card,
@@ -790,44 +846,36 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'space-between',
 	},
-
 	statusText: {
 		fontSize: 16,
 		color: COLORS.lightAccent,
 	},
-
 	statusIndicator: {
 		width: 12,
 		height: 12,
 		borderRadius: 6,
 	},
-
 	// История и данные
 	dataText: {
 		fontSize: 14,
 		color: COLORS.lightAccent,
 	},
-
 	historyContainer: {
 		...COMMON.card,
 		maxHeight: 200,
 	},
-
 	historyList: {
 		flexGrow: 0,
 	},
-
 	historyItem: {
 		paddingVertical: 8,
 		borderBottomWidth: 1,
 		borderBottomColor: 'rgba(255,192,203,0.3)',
 	},
-
 	historyText: {
 		fontSize: 12,
 		color: COLORS.lightAccent,
 	},
-
 	// Настройки
 	settingItem: {
 		flexDirection: 'row',
@@ -838,27 +886,23 @@ const styles = StyleSheet.create({
 		marginBottom: 12,
 		borderRadius: 10,
 	},
-
 	// Пустые слоты
 	emptySlot: {
 		backgroundColor: COLORS.gray,
 		opacity: 0.7,
 	},
-
 	// Текст кнопок
 	buttonText: {
 		color: COLORS.white,
 		fontSize: 14,
 		fontWeight: '500',
 	},
-
 	// Соединение
 	connectionContainer: {
 		...COMMON.container,
 		justifyContent: 'center',
 		alignItems: 'center',
 	},
-
 	connectionText: {
 		fontSize: 18,
 		marginBottom: 24,
