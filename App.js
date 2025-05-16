@@ -32,7 +32,6 @@ const DEVICE_NAME = "ESP32SB";
 const ESP32_SERVICE_UUID = "1111";
 const RECIVE_SLOT_CHARACTERISTIC = "2222";
 const SEND_CAR_DATA_CHARACTERISTIC = "3333";
-const SEND_LIGHTNING_INFO_CHARACTERISTIC = "6666";
 
 const ThemeContext = createContext();
 const BluetoothContext = createContext();
@@ -47,61 +46,17 @@ const BluetoothProvider = ({ children }) => {
 	const [isConnecting, setIsConnecting] = useState(false);
 	const [status, setStatus] = useState("Нажмите для подключения");
 
-	// const requestPermissions = async () => {
-	// 	try {
-	// 		const [bluetoothScanPermission, bluetoothConnectPermission, fineLocationPermission] =
-	// 			await Promise.all([
-	// 				PermissionsAndroid.request(
-	// 					PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
-	// 					{
-	// 						title: "Bluetooth Scan Permission",
-	// 						message: "App needs Bluetooth scan permission to discover devices",
-	// 						buttonPositive: "OK",
-	// 					}
-	// 				),
-	// 				PermissionsAndroid.request(
-	// 					PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
-	// 					{
-	// 						title: "Bluetooth Connect Permission",
-	// 						message: "App needs Bluetooth connect permission to pair devices",
-	// 						buttonPositive: "OK",
-	// 					}
-	// 				),
-	// 				PermissionsAndroid.request(
-	// 					PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-	// 					{
-	// 						title: "Location Permission",
-	// 						message: "Bluetooth Low Energy requires Location",
-	// 						buttonPositive: "OK",
-	// 					}
-	// 				),
-	// 			]);
-	// 		return (
-	// 			bluetoothScanPermission === PermissionsAndroid.RESULTS.GRANTED &&
-	// 			bluetoothConnectPermission === PermissionsAndroid.RESULTS.GRANTED &&
-	// 			fineLocationPermission === PermissionsAndroid.RESULTS.GRANTED
-	// 		);
-	// 	} catch (err) {
-	// 		console.warn("Error requesting permissions: ", err);
-	// 		return false;
-	// 	}
-	// };
 	const requestPermissions = async () => {
 		try {
-			// Проверяем версию Android
 			const isAndroid12OrHigher = Platform.Version >= 31;
-
 			let permissionsToRequest = [];
 			let permissionRationales = {};
-
 			if (isAndroid12OrHigher) {
-				// Для Android 12+ запрашиваем новые разрешения
 				permissionsToRequest = [
 					PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
 					PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
 					PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
 				];
-
 				permissionRationales = {
 					[PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN]: {
 						title: "Bluetooth Scan Permission",
@@ -120,11 +75,9 @@ const BluetoothProvider = ({ children }) => {
 					},
 				};
 			} else {
-				// Для версий ниже Android 12
 				permissionsToRequest = [
 					PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
 				];
-
 				permissionRationales = {
 					[PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION]: {
 						title: "Location Permission",
@@ -133,13 +86,10 @@ const BluetoothProvider = ({ children }) => {
 					},
 				};
 			}
-
 			const result = await PermissionsAndroid.requestMultiple(
 				permissionsToRequest,
 				permissionRationales
 			);
-
-			// Проверяем результаты
 			if (isAndroid12OrHigher) {
 				return (
 					result[PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN] ===
@@ -166,14 +116,12 @@ const BluetoothProvider = ({ children }) => {
 			setStatus("Необходимы разрешения для Bluetooth");
 			return;
 		}
-
 		setIsConnecting(true);
 		setStatus("Поиск устройства...");
-
-		bleManager.startDeviceScan(null, null, (error, device) => {
+		bleManager.startDeviceScan(null, { allowDuplicates: false }, (error, device) => {
 			if (error) {
-				console.log("Ошибка: " + error.message);
-				setStatus("Включите Bluetooth");
+				console.error("Connecting error: " + error.message);
+				setStatus("Ошибка: " + error.message);
 				setIsConnecting(false);
 				setIsConnected(false);
 				return;
@@ -190,6 +138,7 @@ const BluetoothProvider = ({ children }) => {
 					})
 					.then((connectedDevice) => {
 						setDevice(connectedDevice);
+						setIsConnecting(false);
 						setIsConnected(true);
 						setStatus("Подключено!");
 						monitorDeviceCharacteristics(connectedDevice);
@@ -212,9 +161,7 @@ const BluetoothProvider = ({ children }) => {
 					console.error("Monitoring error:", error);
 					return;
 				}
-
 				if (!char?.value) return;
-
 				try {
 					const rawValue = atob(char.value);
 					setReceivedData(rawValue);
@@ -227,23 +174,15 @@ const BluetoothProvider = ({ children }) => {
 
 		return subscription;
 	};
-	// Убрать этот useEffect
-	// useEffect(() => {
-	// 	setReceivedData("1|Toyota|Camry|Black|2020#2|Empty")
-	// }, [])
-
 	useEffect(() => {
 		if (!device) return;
-
 		const disconnectSubscription = bleManager.onDeviceDisconnected(device.id, (error) => {
 			if (error) {
 				console.log("Disconnected with error:", error);
 			}
-
 			setStatus("Отключено");
 			setIsConnected(false);
 
-			// Автоматическое переподключение
 			setStatus("Повторное подключение...");
 			connectToDevice();
 		});
@@ -307,16 +246,22 @@ const BluetoothConnectionScreen = () => {
 	} = useContext(BluetoothContext);
 
 	return (
-		<View style={[styles.connectionContainer, isDarkTheme && styles.darkConnectionContainer]}>
+		<View style={[styles.connectionContainer, isDarkTheme && styles.darkContainer]}>
 			<Text style={[styles.connectionText, isDarkTheme && styles.darkText]}>
 				{status}
 			</Text>
 			{isConnecting ? (
-				<ActivityIndicator size="large" color="#FF1493" />
+				<>
+					<ActivityIndicator size="large" color="#6C63FF" style={{ marginBottom: 24 }} />
+					<TouchableOpacity style={styles.connectButton}>
+						<Text style={styles.buttonText}>Отменить</Text>
+					</TouchableOpacity>
+				</>
 			) : (
 				<TouchableOpacity style={styles.connectButton} onPress={connectToDevice}>
 					<Text style={styles.buttonText}>Подключиться</Text>
 				</TouchableOpacity>
+
 			)}
 		</View>
 	);
@@ -326,7 +271,9 @@ const HomeScreen = () => {
 	const { receivedData, isConnected, sendData } = useContext(BluetoothContext);
 	const [search, setSearch] = useState("");
 	const [selectedCar, setSelectedCar] = useState(null);
+	const [localCarData, setLocalCarData] = useState("");
 	const [modalVisible, setModalVisible] = useState(false);
+	const [lightingStatus, setLightingStatus] = useState({});
 	const [editData, setEditData] = useState({
 		brand: '',
 		model: '',
@@ -351,7 +298,11 @@ const HomeScreen = () => {
 			};
 		});
 	};
-
+	useEffect(() => {
+		if (receivedData) {
+			setLocalCarData(receivedData);
+		}
+	}, [receivedData]);
 	// Открытие модального окна с заполнением данных
 	const openCarModal = (car) => {
 		setSelectedCar(car);
@@ -363,21 +314,35 @@ const HomeScreen = () => {
 		});
 		setModalVisible(true);
 	};
-
 	// Отправка данных на ESP32
 	const sendCarData = async () => {
 		if (!isConnected) {
 			alert("Устройство не подключено!");
 			return;
 		}
-
 		try {
 			// Формируем строку для ESP32 в формате "id|brand|model|color|year"
-			const dataString = `${selectedCar.id}|${editData.brand}|${editData.model}|${editData.color}|${editData.year}`;
+			const isClearing = !editData.brand && !editData.model && !editData.color && !editData.year;
+
+			// Формируем строку для ESP32
+			const dataString = isClearing
+				? `${selectedCar.id}|Empty`  // Формат для очистки
+				: `${selectedCar.id}|${editData.brand}|${editData.model}|${editData.color}|${editData.year}`;
+
+			// const dataString = `${selectedCar.id}|${editData.brand}|${editData.model}|${editData.color}|${editData.year}`;
 			const success = await sendData(dataString);
 
 			if (success) {
 				alert(`Данные отправлены: ${dataString}`);
+				const updatedData = localCarData.split('#').map(slot => {
+					const parts = slot.split('|');
+					if (parts[0] === selectedCar.id) {
+						return dataString;
+					}
+					return slot;
+				}).join('#');
+
+				setLocalCarData(updatedData);
 				setModalVisible(false);
 			} else {
 				alert("Ошибка отправки данных");
@@ -386,26 +351,30 @@ const HomeScreen = () => {
 			alert(`Ошибка: ${error.message}`);
 		}
 	};
-	// const sendLightningData = async () => {
-	// 	if (!isConnected) {
-	// 		alert("Устройство не подключено!");
-	// 		return;
-	// 	}
+	const sendLightingData = async (car) => {
+		if (!isConnected) {
+			alert("Устройство не подключено!");
+			return;
+		}
 
-	// 	try {
-	// 		const dataString = `${selectedCar.id}|true`;
-	// 		const success = await sendData(dataString);
+		try {
+			const newStatus = !lightingStatus[car.id];
+			const dataString = `${car.id}|light|${newStatus}`;
+			const success = await sendData(dataString);
 
-	// 		if (success) {
-	// 			alert(`Данные отправлены: ${dataString}`);
-	// 			setModalVisible(false);
-	// 		} else {
-	// 			alert("Ошибка отправки данных");
-	// 		}
-	// 	} catch (error) {
-	// 		alert(`Ошибка: ${error.message}`);
-	// 	}
-	// };
+			if (success) {
+				alert(`Данные отправлены: ${dataString}`);
+				setLightingStatus(prev => ({
+					...prev,
+					[car.id]: newStatus
+				}));
+			} else {
+				alert("Ошибка отправки данных");
+			}
+		} catch (error) {
+			alert(`Ошибка: ${error.message}`);
+		}
+	};
 	// Обработчик изменения полей ввода
 	const handleInputChange = (field, value) => {
 		setEditData(prev => ({
@@ -414,7 +383,7 @@ const HomeScreen = () => {
 		}));
 	};
 
-	const cars = parseCarData(receivedData);
+	const cars = parseCarData(localCarData);
 	const filteredCars = cars.filter(car =>
 		car.isEmpty ||
 		`${car.brand} ${car.model}`.toLowerCase().includes(search.toLowerCase())
@@ -424,19 +393,10 @@ const HomeScreen = () => {
 	};
 	return (
 		<View style={[styles.container, isDarkTheme && styles.darkContainer]}>
-			<View style={[styles.statusContainer, isDarkTheme && styles.darkItem]}>
-				<Text style={[styles.statusText, isDarkTheme && styles.darkText]}>
-					Статус: {isConnected ? "Подключено" : "Отключено"}
-				</Text>
-				<View style={[styles.statusIndicator, {
-					backgroundColor: isConnected ? '#4CAF50' : '#F44336'
-				}]} />
-			</View>
-
 			<TextInput
 				style={isDarkTheme ? styles.darkSearchInput : styles.searchInput}
 				placeholder="Поиск..."
-				placeholderTextColor={isDarkTheme ? COLORS.lightAccent : COLORS.gray}
+				placeholderTextColor={isDarkTheme ? COLORS.white : COLORS.gray}
 				value={search}
 				onChangeText={handleSearch}
 			/>
@@ -453,25 +413,24 @@ const HomeScreen = () => {
 						]}
 						onPress={() => openCarModal(item)}
 					>
-						<Image
-							source={{ uri: item.image || "https://via.placeholder.com/150" }}
-							style={styles.carImage}
-						/>
 						<View style={styles.carInfo}>
 							{item.isEmpty ? (
 								<Text style={[styles.text, isDarkTheme && styles.darkText]}>
-									Слот {item.id} - Пусто
+									{`Номер ${item.id} | Пустая`}
 								</Text>
 							) : (
 								<>
 									<Text style={[styles.text, isDarkTheme && styles.darkText]}>
-										{`${item.brand} ${item.model} - ${item.color}`}
+										{`Номер ${item.id} | ${item.brand} ${item.model} - ${item.color}`}
 									</Text>
 									<TouchableOpacity
-										style={styles.sendButton}
+										style={[
+											styles.sendButton,
+											lightingStatus[item.id] && styles.lightOnButton
+										]}
 										onPress={() => sendLightingData(item)}
 									>
-										<Text style={styles.buttonText}>Подсветить</Text>
+										<Text style={styles.buttonText}>{lightingStatus[item.id] ? "Отключить" : "Подсветить"}</Text>
 									</TouchableOpacity>
 								</>
 							)}
@@ -480,31 +439,29 @@ const HomeScreen = () => {
 				)}
 			/>
 
-
 			<Modal visible={modalVisible} transparent animationType="slide">
 				<View style={styles.modalContainer}>
 					<View style={[styles.modalContent, isDarkTheme && styles.darkItem]}>
 						<Text style={[styles.modalTitle, isDarkTheme && styles.darkText]}>
 							Слот {selectedCar?.id}
 						</Text>
-
-						{/* Поля ввода */}
 						<View style={styles.inputContainer}>
 							<Text style={[styles.label, isDarkTheme && styles.darkText]}>Марка:</Text>
 							<TextInput
 								style={[styles.input, isDarkTheme && styles.darkInput]}
 								value={editData.brand}
 								onChangeText={(text) => handleInputChange('brand', text)}
+								placeholderTextColor={isDarkTheme ? COLORS.darkPlaceholder : COLORS.lightPlaceholder}
 								placeholder="Введите марку"
 							/>
 						</View>
-
 						<View style={styles.inputContainer}>
 							<Text style={[styles.label, isDarkTheme && styles.darkText]}>Модель:</Text>
 							<TextInput
 								style={[styles.input, isDarkTheme && styles.darkInput]}
 								value={editData.model}
 								onChangeText={(text) => handleInputChange('model', text)}
+								placeholderTextColor={isDarkTheme ? COLORS.darkPlaceholder : COLORS.lightPlaceholder}
 								placeholder="Введите модель"
 							/>
 						</View>
@@ -515,6 +472,7 @@ const HomeScreen = () => {
 								style={[styles.input, isDarkTheme && styles.darkInput]}
 								value={editData.color}
 								onChangeText={(text) => handleInputChange('color', text)}
+								placeholderTextColor={isDarkTheme ? COLORS.darkPlaceholder : COLORS.lightPlaceholder}
 								placeholder="Введите цвет"
 							/>
 						</View>
@@ -525,18 +483,18 @@ const HomeScreen = () => {
 								style={[styles.input, isDarkTheme && styles.darkInput]}
 								value={editData.year}
 								onChangeText={(text) => handleInputChange('year', text)}
+								placeholderTextColor={isDarkTheme ? COLORS.darkPlaceholder : COLORS.lightPlaceholder}
 								placeholder="Введите год"
 								keyboardType="numeric"
 							/>
 						</View>
 
-						{/* Кнопки действий */}
 						<View style={styles.buttonRow}>
 							<TouchableOpacity
 								style={[styles.actionButton, styles.saveButton]}
 								onPress={sendCarData}
 							>
-								<Text style={styles.buttonText}>Сохранить и отправить</Text>
+								<Text style={styles.buttonText}>Сохранить</Text>
 							</TouchableOpacity>
 
 							<TouchableOpacity
@@ -575,7 +533,7 @@ const SettingsScreen = () => {
 				<Text style={[styles.text, isDarkTheme && styles.darkText]}>Тёмная тема</Text>
 				<Switch
 					trackColor={{ false: "#767577", true: "#81b0ff" }}
-					thumbColor={isDarkTheme ? "#f5dd4b" : "#f4f3f4"}
+					thumbColor={isDarkTheme ? "#6C63FF" : "#f4f3f4"}
 					onValueChange={toggleTheme}
 					value={isDarkTheme}
 				/>
@@ -598,12 +556,15 @@ export default function App() {
 }
 const MainAppContent = () => {
 	const { isConnected } = useContext(BluetoothContext);
-	const { isDarkTheme } = useContext(ThemeContext);
-	// Должно быть !isConnected
+
 	return (
 		<>
 			{!isConnected ? (
-				<BluetoothConnectionScreen />
+				<>
+					<BluetoothConnectionScreen />
+					<StatusBar style={"light"} />
+				</>
+
 			) : (
 				<NavigationContainer>
 					<Tab.Navigator
@@ -619,37 +580,39 @@ const MainAppContent = () => {
 
 								return <Ionicons name={iconName} size={size} color={color} />;
 							},
-							tabBarActiveTintColor: "#FF1493",
-							tabBarInactiveTintColor: "gray",
+							tabBarActiveTintColor: "#6C63FF",
+							tabBarInactiveTintColor: "#666666",
 						})}
 					>
 						<Tab.Screen name="Главная" component={HomeScreen} />
 						<Tab.Screen name="Настройки" component={SettingsScreen} />
 					</Tab.Navigator>
+					<StatusBar style={"dark"} />
 				</NavigationContainer>
 			)}
-			<StatusBar style={"dark"} />
 		</>
 	);
 };
 
+// Стили
 const COLORS = {
-	primary: '#4B0082',
-	secondary: '#800080',
-	accent: '#FF1493',
-	lightAccent: '#FFC0CB',
-	darkBg: '#121212',
-	darkItem: '#333',
-	error: '#F44336',
-	warning: '#FF9800',
-	success: '#4CAF50',
-	reconnect: '#FF6347',
+	primary: '#1E1E2F',        // основной фон (темно-синий/фиолетовый оттенок)
+	secondary: '#2A2A40',      // карточки и блоки
+	accent: '#6C63FF',         // основной акцент (фиолетово-синий)
+	lightAccent: '#A3A3FF',    // светлый акцент для текста
+	darkBg: '#121212',         // черный фон
+	darkItem: '#1C1C1C',       // карточки в тёмной теме
+	error: '#EF5350',          // красный
+	warning: '#FFA726',        // оранжевый
+	success: '#4CAF50',        // зелёный
+	reconnect: '#FF7043',      // яркий оранжевый
 	white: '#FFFFFF',
 	black: '#000000',
-	gray: '#CCCCCC',
-	darkGray: '#555',
+	gray: '#C4C4C4',
+	darkGray: '#666666',
+	lightPlaceholder: '#999999',  // Серый для светлой темы
+	darkPlaceholder: '#CCCCCC',   // Светло-серый для темной темы
 };
-// Общие стили
 const COMMON = {
 	container: {
 		flex: 1,
@@ -770,6 +733,9 @@ const styles = StyleSheet.create({
 		...COMMON.button,
 		backgroundColor: COLORS.error,
 		flex: 1,
+	},
+	lightOnButton: {
+		backgroundColor: '#FF5722', // или любой другой цвет для активного состояния
 	},
 	actionButton: {
 		...COMMON.button,
