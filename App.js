@@ -47,119 +47,119 @@ const BluetoothProvider = ({ children }) => {
 	const [isConnecting, setIsConnecting] = useState(false);
 	const [status, setStatus] = useState("Нажмите для подключения");
 
-	const requestPermissions = async () => {
-		try {
-			const [bluetoothScanPermission, bluetoothConnectPermission, fineLocationPermission] =
-				await Promise.all([
-					PermissionsAndroid.request(
-						PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
-						{
-							title: "Bluetooth Scan Permission",
-							message: "App needs Bluetooth scan permission to discover devices",
-							buttonPositive: "OK",
-						}
-					),
-					PermissionsAndroid.request(
-						PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
-						{
-							title: "Bluetooth Connect Permission",
-							message: "App needs Bluetooth connect permission to pair devices",
-							buttonPositive: "OK",
-						}
-					),
-					PermissionsAndroid.request(
-						PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-						{
-							title: "Location Permission",
-							message: "Bluetooth Low Energy requires Location",
-							buttonPositive: "OK",
-						}
-					),
-				]);
-			return (
-				bluetoothScanPermission === PermissionsAndroid.RESULTS.GRANTED &&
-				bluetoothConnectPermission === PermissionsAndroid.RESULTS.GRANTED &&
-				fineLocationPermission === PermissionsAndroid.RESULTS.GRANTED
-			);
-		} catch (err) {
-			console.warn("Error requesting permissions: ", err);
-			return false;
-		}
-	};
 	// const requestPermissions = async () => {
 	// 	try {
-	// 		// Проверяем версию Android
-	// 		const isAndroid12OrHigher = Platform.Version >= 31;
-
-	// 		let permissionsToRequest = [];
-	// 		let permissionRationales = {};
-
-	// 		if (isAndroid12OrHigher) {
-	// 			// Для Android 12+ запрашиваем новые разрешения
-	// 			permissionsToRequest = [
-	// 				PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
-	// 				PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
-	// 				PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-	// 			];
-
-	// 			permissionRationales = {
-	// 				[PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN]: {
-	// 					title: "Bluetooth Scan Permission",
-	// 					message: "App needs Bluetooth scan permission to discover devices",
-	// 					buttonPositive: "OK",
-	// 				},
-	// 				[PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT]: {
-	// 					title: "Bluetooth Connect Permission",
-	// 					message: "App needs Bluetooth connect permission to pair devices",
-	// 					buttonPositive: "OK",
-	// 				},
-	// 				[PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION]: {
-	// 					title: "Location Permission",
-	// 					message: "Bluetooth Low Energy requires Location",
-	// 					buttonPositive: "OK",
-	// 				},
-	// 			};
-	// 		} else {
-	// 			// Для версий ниже Android 12
-	// 			permissionsToRequest = [
-	// 				PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-	// 			];
-
-	// 			permissionRationales = {
-	// 				[PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION]: {
-	// 					title: "Location Permission",
-	// 					message: "Bluetooth Low Energy requires Location",
-	// 					buttonPositive: "OK",
-	// 				},
-	// 			};
-	// 		}
-
-	// 		const result = await PermissionsAndroid.requestMultiple(
-	// 			permissionsToRequest,
-	// 			permissionRationales
+	// 		const [bluetoothScanPermission, bluetoothConnectPermission, fineLocationPermission] =
+	// 			await Promise.all([
+	// 				PermissionsAndroid.request(
+	// 					PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
+	// 					{
+	// 						title: "Bluetooth Scan Permission",
+	// 						message: "App needs Bluetooth scan permission to discover devices",
+	// 						buttonPositive: "OK",
+	// 					}
+	// 				),
+	// 				PermissionsAndroid.request(
+	// 					PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
+	// 					{
+	// 						title: "Bluetooth Connect Permission",
+	// 						message: "App needs Bluetooth connect permission to pair devices",
+	// 						buttonPositive: "OK",
+	// 					}
+	// 				),
+	// 				PermissionsAndroid.request(
+	// 					PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+	// 					{
+	// 						title: "Location Permission",
+	// 						message: "Bluetooth Low Energy requires Location",
+	// 						buttonPositive: "OK",
+	// 					}
+	// 				),
+	// 			]);
+	// 		return (
+	// 			bluetoothScanPermission === PermissionsAndroid.RESULTS.GRANTED &&
+	// 			bluetoothConnectPermission === PermissionsAndroid.RESULTS.GRANTED &&
+	// 			fineLocationPermission === PermissionsAndroid.RESULTS.GRANTED
 	// 		);
-
-	// 		// Проверяем результаты
-	// 		if (isAndroid12OrHigher) {
-	// 			return (
-	// 				result[PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN] ===
-	// 				PermissionsAndroid.RESULTS.GRANTED &&
-	// 				result[PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT] ===
-	// 				PermissionsAndroid.RESULTS.GRANTED &&
-	// 				result[PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION] ===
-	// 				PermissionsAndroid.RESULTS.GRANTED
-	// 			);
-	// 		} else {
-	// 			return (
-	// 				result[PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION] ===
-	// 				PermissionsAndroid.RESULTS.GRANTED
-	// 			);
-	// 		}
 	// 	} catch (err) {
 	// 		console.warn("Error requesting permissions: ", err);
 	// 		return false;
 	// 	}
 	// };
+	const requestPermissions = async () => {
+		try {
+			// Проверяем версию Android
+			const isAndroid12OrHigher = Platform.Version >= 31;
+
+			let permissionsToRequest = [];
+			let permissionRationales = {};
+
+			if (isAndroid12OrHigher) {
+				// Для Android 12+ запрашиваем новые разрешения
+				permissionsToRequest = [
+					PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
+					PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
+					PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+				];
+
+				permissionRationales = {
+					[PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN]: {
+						title: "Bluetooth Scan Permission",
+						message: "App needs Bluetooth scan permission to discover devices",
+						buttonPositive: "OK",
+					},
+					[PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT]: {
+						title: "Bluetooth Connect Permission",
+						message: "App needs Bluetooth connect permission to pair devices",
+						buttonPositive: "OK",
+					},
+					[PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION]: {
+						title: "Location Permission",
+						message: "Bluetooth Low Energy requires Location",
+						buttonPositive: "OK",
+					},
+				};
+			} else {
+				// Для версий ниже Android 12
+				permissionsToRequest = [
+					PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+				];
+
+				permissionRationales = {
+					[PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION]: {
+						title: "Location Permission",
+						message: "Bluetooth Low Energy requires Location",
+						buttonPositive: "OK",
+					},
+				};
+			}
+
+			const result = await PermissionsAndroid.requestMultiple(
+				permissionsToRequest,
+				permissionRationales
+			);
+
+			// Проверяем результаты
+			if (isAndroid12OrHigher) {
+				return (
+					result[PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN] ===
+					PermissionsAndroid.RESULTS.GRANTED &&
+					result[PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT] ===
+					PermissionsAndroid.RESULTS.GRANTED &&
+					result[PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION] ===
+					PermissionsAndroid.RESULTS.GRANTED
+				);
+			} else {
+				return (
+					result[PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION] ===
+					PermissionsAndroid.RESULTS.GRANTED
+				);
+			}
+		} catch (err) {
+			console.warn("Error requesting permissions: ", err);
+			return false;
+		}
+	};
 	const connectToDevice = async () => {
 		const hasPermissions = await requestPermissions();
 		if (!hasPermissions) {
@@ -228,9 +228,9 @@ const BluetoothProvider = ({ children }) => {
 		return subscription;
 	};
 	// Убрать этот useEffect
-	useEffect(() => {
-		setReceivedData("1|Toyota|Camry|Black|2020#2|Empty")
-	}, [])
+	// useEffect(() => {
+	// 	setReceivedData("1|Toyota|Camry|Black|2020#2|Empty")
+	// }, [])
 
 	useEffect(() => {
 		if (!device) return;
@@ -602,7 +602,7 @@ const MainAppContent = () => {
 	// Должно быть !isConnected
 	return (
 		<>
-			{isConnected ? (
+			{!isConnected ? (
 				<BluetoothConnectionScreen />
 			) : (
 				<NavigationContainer>

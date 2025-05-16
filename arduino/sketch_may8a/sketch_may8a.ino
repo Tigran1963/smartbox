@@ -108,15 +108,22 @@ void setup(){
 
   Serial.println("Waiting for a client connection to notify...");
 }
+String carData[] = {
+  "1|Toyota|Camry|Black|2020#2|Empty",
+  "1|BMW|X5|White|2021#2|Tesla|Model3|Red|2019",
+  "1|Honda|Civic|Blue|2018#2|Lada|Vesta|Grey|2022",
+  "1|Empty#2|Toyota|Corolla|Silver|2017"
+};
 
-void loop()
-{
-  String cars = "1|Toyota|Camry|Black|2020#2|Empty";
-  String stepData = String(cars);
+int currentIndex = 0;
+const int totalMessages = sizeof(carData) / sizeof(carData[0]);
+
+void loop() {
+  String stepData = carData[currentIndex];
   message_characteristic->setValue(stepData.c_str());
   message_characteristic->notify();
-  Serial.println(cars);
+  Serial.println(stepData);
 
-  delay(10000);
-
+  currentIndex = (currentIndex + 1) % totalMessages; // Переключение на следующее сообщение
+  delay(20000);
 }
