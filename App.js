@@ -3,7 +3,7 @@ import React, {
 	useEffect,
 	createContext,
 	useContext,
-	useCallback
+	useCallback,
 } from "react";
 import {
 	View,
@@ -13,13 +13,11 @@ import {
 	TextInput,
 	TouchableOpacity,
 	Modal,
-	Image,
 	Switch,
 	ScrollView,
 	ActivityIndicator,
 	PermissionsAndroid,
 	Platform,
-	Button
 } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
@@ -33,6 +31,11 @@ const ESP32_SERVICE_UUID = "1111";
 const RECIVE_SLOT_CHARACTERISTIC = "2222";
 const SEND_CAR_DATA_CHARACTERISTIC = "3333";
 
+// const DEVICE_NAME = "SmartboxHSE";
+// const ESP32_SERVICE_UUID = "d8d07f89-c412-43d8-8d89-d9bd9f4c2314";
+// const RECIVE_SLOT_CHARACTERISTIC = "cd1f68ad-8990-492d-a8c1-412674941097";
+// const SEND_CAR_DATA_CHARACTERISTIC = "1eec0220-bdb0-4d99-9840-cc965d79021b";
+
 const ThemeContext = createContext();
 const BluetoothContext = createContext();
 
@@ -42,8 +45,9 @@ const bleManager = new BleManager();
 const BluetoothProvider = ({ children }) => {
 	const [device, setDevice] = useState(null);
 	const [isConnected, setIsConnected] = useState(false);
-	const [receivedData, setReceivedData] = useState("");
 	const [isConnecting, setIsConnecting] = useState(false);
+	//const [isCanceled, setIsCanceled] = useState(false)
+	const [receivedData, setReceivedData] = useState("");
 	const [status, setStatus] = useState("Нажмите для подключения");
 
 	const requestPermissions = async () => {
@@ -118,7 +122,7 @@ const BluetoothProvider = ({ children }) => {
 		}
 		setIsConnecting(true);
 		setStatus("Поиск устройства...");
-		bleManager.startDeviceScan(null, { allowDuplicates: false }, (error, device) => {
+		bleManager.startDeviceScan(null, null, (error, device) => {
 			if (error) {
 				console.error("Connecting error: " + error.message);
 				setStatus("Ошибка: " + error.message);
@@ -152,6 +156,33 @@ const BluetoothProvider = ({ children }) => {
 		});
 	};
 
+	// Отмена соединения
+	const cancelConnection = async () => {
+		// bleManager.stopDeviceScan();
+		// bleManager.cancelDeviceConnection()
+		// setIsCanceled(true)
+		setIsConnecting(false)
+		setIsConnected(false)
+		setStatus("Нажмите для подключения")
+	}
+	// Действия при отключении соединения
+	useEffect(() => {
+		if (!device) return;
+		const disconnectSubscription = bleManager.onDeviceDisconnected(device.id, (error) => {
+			if (error) {
+				console.log("Disconnected with error:", error);
+			}
+			console.log('disconnect')
+			// setIsConnected(false);
+			// connectToDevice();
+		});
+		const charSubscription = monitorDeviceCharacteristics(device);
+		return () => {
+			disconnectSubscription.remove();
+			charSubscription?.remove();
+		};
+	}, [device]);
+	// Получение данных
 	const monitorDeviceCharacteristics = (device) => {
 		const subscription = device.monitorCharacteristicForService(
 			ESP32_SERVICE_UUID,
@@ -174,27 +205,7 @@ const BluetoothProvider = ({ children }) => {
 
 		return subscription;
 	};
-	useEffect(() => {
-		if (!device) return;
-		const disconnectSubscription = bleManager.onDeviceDisconnected(device.id, (error) => {
-			if (error) {
-				console.log("Disconnected with error:", error);
-			}
-			setStatus("Отключено");
-			setIsConnected(false);
-
-			setStatus("Повторное подключение...");
-			connectToDevice();
-		});
-
-		const charSubscription = monitorDeviceCharacteristics(device);
-
-		return () => {
-			disconnectSubscription.remove();
-			charSubscription?.remove();
-		};
-	}, [device]);
-
+	// Отправка данных
 	const writeCharacteristic = useCallback(async (serviceUUID, characteristicUUID, data) => {
 		if (!device || !device.isConnected) {
 			console.warn("Устройство не подключено");
@@ -214,7 +225,6 @@ const BluetoothProvider = ({ children }) => {
 			return false;
 		}
 	}, [device]);
-
 	const sendData = useCallback(async (data) => {
 		return writeCharacteristic(ESP32_SERVICE_UUID, SEND_CAR_DATA_CHARACTERISTIC, data);
 	}, [writeCharacteristic]);
@@ -228,8 +238,8 @@ const BluetoothProvider = ({ children }) => {
 		connectToDevice,
 		sendData,
 		writeCharacteristic,
+		cancelConnection,
 	};
-
 	return (
 		<BluetoothContext.Provider value={value}>
 			{children}
@@ -243,6 +253,7 @@ const BluetoothConnectionScreen = () => {
 		status,
 		isConnecting,
 		connectToDevice,
+		cancelConnection
 	} = useContext(BluetoothContext);
 
 	return (
@@ -253,7 +264,7 @@ const BluetoothConnectionScreen = () => {
 			{isConnecting ? (
 				<>
 					<ActivityIndicator size="large" color="#6C63FF" style={{ marginBottom: 24 }} />
-					<TouchableOpacity style={styles.connectButton}>
+					<TouchableOpacity style={styles.connectButton} onPress={cancelConnection}>
 						<Text style={styles.buttonText}>Отменить</Text>
 					</TouchableOpacity>
 				</>
@@ -323,17 +334,14 @@ const HomeScreen = () => {
 		try {
 			// Формируем строку для ESP32 в формате "id|brand|model|color|year"
 			const isClearing = !editData.brand && !editData.model && !editData.color && !editData.year;
-
 			// Формируем строку для ESP32
 			const dataString = isClearing
 				? `${selectedCar.id}|Empty`  // Формат для очистки
 				: `${selectedCar.id}|${editData.brand}|${editData.model}|${editData.color}|${editData.year}`;
-
 			// const dataString = `${selectedCar.id}|${editData.brand}|${editData.model}|${editData.color}|${editData.year}`;
 			const success = await sendData(dataString);
-
 			if (success) {
-				alert(`Данные отправлены: ${dataString}`);
+				console.log(`Данные отправлены: ${dataString}`);
 				const updatedData = localCarData.split('#').map(slot => {
 					const parts = slot.split('|');
 					if (parts[0] === selectedCar.id) {
@@ -345,7 +353,7 @@ const HomeScreen = () => {
 				setLocalCarData(updatedData);
 				setModalVisible(false);
 			} else {
-				alert("Ошибка отправки данных");
+				alert("Ошибка, повторите попытку");
 			}
 		} catch (error) {
 			alert(`Ошибка: ${error.message}`);
@@ -356,20 +364,19 @@ const HomeScreen = () => {
 			alert("Устройство не подключено!");
 			return;
 		}
-
 		try {
 			const newStatus = !lightingStatus[car.id];
 			const dataString = `${car.id}|light|${newStatus}`;
 			const success = await sendData(dataString);
 
 			if (success) {
-				alert(`Данные отправлены: ${dataString}`);
+				console.log(`Данные отправлены: ${dataString}`);
 				setLightingStatus(prev => ({
 					...prev,
 					[car.id]: newStatus
 				}));
 			} else {
-				alert("Ошибка отправки данных");
+				alert("Ошибка, повторите попытку");
 			}
 		} catch (error) {
 			alert(`Ошибка: ${error.message}`);
@@ -415,18 +422,17 @@ const HomeScreen = () => {
 					>
 						<View style={styles.carInfo}>
 							{item.isEmpty ? (
-								<Text style={[styles.text, isDarkTheme && styles.darkText]}>
-									{`Номер ${item.id} | Пустая`}
+								<Text style={[styles.darkText]}>
+									{`#${item.id} | Пустая`}
 								</Text>
 							) : (
 								<>
 									<Text style={[styles.text, isDarkTheme && styles.darkText]}>
-										{`Номер ${item.id} | ${item.brand} ${item.model} - ${item.color}`}
+										{`#${item.id} | ${item.brand} ${item.model} - ${item.color}`}
 									</Text>
 									<TouchableOpacity
 										style={[
-											styles.sendButton,
-											lightingStatus[item.id] && styles.lightOnButton
+											styles.sendButton
 										]}
 										onPress={() => sendLightingData(item)}
 									>
@@ -443,7 +449,7 @@ const HomeScreen = () => {
 				<View style={styles.modalContainer}>
 					<View style={[styles.modalContent, isDarkTheme && styles.darkItem]}>
 						<Text style={[styles.modalTitle, isDarkTheme && styles.darkText]}>
-							Слот {selectedCar?.id}
+							Ячейка {selectedCar?.id}
 						</Text>
 						<View style={styles.inputContainer}>
 							<Text style={[styles.label, isDarkTheme && styles.darkText]}>Марка:</Text>
@@ -716,7 +722,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-between',
 		marginTop: 20,
 		width: '100%',
-		gap: 12,
+		gap: 8,
 	},
 	// Кнопки
 	saveButton: {
@@ -734,12 +740,10 @@ const styles = StyleSheet.create({
 		backgroundColor: COLORS.error,
 		flex: 1,
 	},
-	lightOnButton: {
-		backgroundColor: '#FF5722', // или любой другой цвет для активного состояния
-	},
 	actionButton: {
 		...COMMON.button,
-		minWidth: '30%',
+		padding: 4,
+		minWidth: '25%',
 	},
 	sendButton: {
 		...COMMON.button,
