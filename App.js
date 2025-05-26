@@ -23,13 +23,8 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from 'expo-status-bar';
-import { BleManager } from "@";
+import { BleManager } from "react-native-ble-plx";
 import { atob, btoa } from "react-native-quick-base64";
-
-// const DEVICE_NAME = "ESP32SB";
-// const ESP32_SERVICE_UUID = "1111";
-// const RECIVE_SLOT_CHARACTERISTIC = "2222";
-// const SEND_CAR_DATA_CHARACTERISTIC = "3333";
 
 const DEVICE_NAME = "SmartboxHSE";
 const ESP32_SERVICE_UUID = "d8d07f89-c412-43d8-8d89-d9bd9f4c2314";
@@ -46,7 +41,6 @@ const BluetoothProvider = ({ children }) => {
 	const [device, setDevice] = useState(null);
 	const [isConnected, setIsConnected] = useState(false);
 	const [isConnecting, setIsConnecting] = useState(false);
-	//const [isCanceled, setIsCanceled] = useState(false)
 	const [receivedData, setReceivedData] = useState("");
 	const [status, setStatus] = useState("Нажмите для подключения");
 
@@ -155,12 +149,10 @@ const BluetoothProvider = ({ children }) => {
 			}
 		});
 	};
-
 	// Отмена соединения
 	const cancelConnection = async () => {
-		// bleManager.stopDeviceScan();
-		// bleManager.cancelDeviceConnection()
-		// setIsCanceled(true)
+		bleManager.stopDeviceScan();
+		bleManager.cancelDeviceConnection()
 		setIsConnecting(false)
 		setIsConnected(false)
 		setStatus("Нажмите для подключения")
@@ -616,8 +608,8 @@ const COLORS = {
 	black: '#000000',
 	gray: '#C4C4C4',
 	darkGray: '#666666',
-	lightPlaceholder: '#999999',  // Серый для светлой темы
-	darkPlaceholder: '#CCCCCC',   // Светло-серый для темной темы
+	lightPlaceholder: '#999999',  // cерый для светлой темы
+	darkPlaceholder: '#CCCCCC',   // cветло-серый для темной темы
 };
 const COMMON = {
 	container: {
