@@ -23,18 +23,18 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from 'expo-status-bar';
-import { BleManager } from "react-native-ble-plx";
+import { BleManager } from "@";
 import { atob, btoa } from "react-native-quick-base64";
 
-const DEVICE_NAME = "ESP32SB";
-const ESP32_SERVICE_UUID = "1111";
-const RECIVE_SLOT_CHARACTERISTIC = "2222";
-const SEND_CAR_DATA_CHARACTERISTIC = "3333";
+// const DEVICE_NAME = "ESP32SB";
+// const ESP32_SERVICE_UUID = "1111";
+// const RECIVE_SLOT_CHARACTERISTIC = "2222";
+// const SEND_CAR_DATA_CHARACTERISTIC = "3333";
 
-// const DEVICE_NAME = "SmartboxHSE";
-// const ESP32_SERVICE_UUID = "d8d07f89-c412-43d8-8d89-d9bd9f4c2314";
-// const RECIVE_SLOT_CHARACTERISTIC = "cd1f68ad-8990-492d-a8c1-412674941097";
-// const SEND_CAR_DATA_CHARACTERISTIC = "1eec0220-bdb0-4d99-9840-cc965d79021b";
+const DEVICE_NAME = "SmartboxHSE";
+const ESP32_SERVICE_UUID = "d8d07f89-c412-43d8-8d89-d9bd9f4c2314";
+const RECIVE_SLOT_CHARACTERISTIC = "cd1f68ad-8990-492d-a8c1-412674941097";
+const SEND_CAR_DATA_CHARACTERISTIC = "1eec0220-bdb0-4d99-9840-cc965d79021b";
 
 const ThemeContext = createContext();
 const BluetoothContext = createContext();

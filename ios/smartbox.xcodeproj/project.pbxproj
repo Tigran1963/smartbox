@@ -8,11 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
-		2350C68E55E0029882C3BCF1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 241779487A003A4C38AC7A69 /* PrivacyInfo.xcprivacy */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
-		899F1C2BCDBB35C6A624FDAC /* libPods-Smartbox.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8949CE1DE90FBE2DD30C75D8 /* libPods-Smartbox.a */; };
-		9FC46A08FE57EE679DF80A83 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8453D1869E3536D56FC0BF36 /* ExpoModulesProvider.swift */; };
+		9A6777CFFA855FD5D6CB8CC3 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6E79B500FE11B75B28DD66A /* ExpoModulesProvider.swift */; };
+		BA0B8F5C5C3F9908B3E13975 /* libPods-Smartbox.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 40A2571B59434791D0F87928 /* libPods-Smartbox.a */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
+		D44327D9807AB5FC31558482 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5A53A8D4291AD01BAEFE4EDA /* PrivacyInfo.xcprivacy */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
 
@@ -20,13 +20,13 @@
 		13B07F961A680F5B00A75B9A /* Smartbox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Smartbox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Smartbox/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Smartbox/Info.plist; sourceTree = "<group>"; };
-		1E257297354D9883E44F755A /* Pods-Smartbox.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Smartbox.debug.xcconfig"; path = "Target Support Files/Pods-Smartbox/Pods-Smartbox.debug.xcconfig"; sourceTree = "<group>"; };
-		241779487A003A4C38AC7A69 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = Smartbox/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		571FE9C48DE93D996A0C6C0F /* Pods-Smartbox.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Smartbox.release.xcconfig"; path = "Target Support Files/Pods-Smartbox/Pods-Smartbox.release.xcconfig"; sourceTree = "<group>"; };
-		8453D1869E3536D56FC0BF36 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Smartbox/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
-		8949CE1DE90FBE2DD30C75D8 /* libPods-Smartbox.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Smartbox.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		40A2571B59434791D0F87928 /* libPods-Smartbox.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Smartbox.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4E6DF9CE6EEFAE8703A4DA94 /* Pods-Smartbox.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Smartbox.debug.xcconfig"; path = "Target Support Files/Pods-Smartbox/Pods-Smartbox.debug.xcconfig"; sourceTree = "<group>"; };
+		5A53A8D4291AD01BAEFE4EDA /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = Smartbox/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		A6E79B500FE11B75B28DD66A /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Smartbox/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = Smartbox/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
+		D74F3E41F7591B96538789E0 /* Pods-Smartbox.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Smartbox.release.xcconfig"; path = "Target Support Files/Pods-Smartbox/Pods-Smartbox.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = Smartbox/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* Smartbox-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "Smartbox-Bridging-Header.h"; path = "Smartbox/Smartbox-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -37,7 +37,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				899F1C2BCDBB35C6A624FDAC /* libPods-Smartbox.a in Frameworks */,
+				BA0B8F5C5C3F9908B3E13975 /* libPods-Smartbox.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -53,7 +53,7 @@
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				241779487A003A4C38AC7A69 /* PrivacyInfo.xcprivacy */,
+				5A53A8D4291AD01BAEFE4EDA /* PrivacyInfo.xcprivacy */,
 			);
 			name = Smartbox;
 			sourceTree = "<group>";
@@ -62,35 +62,9 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				8949CE1DE90FBE2DD30C75D8 /* libPods-Smartbox.a */,
+				40A2571B59434791D0F87928 /* libPods-Smartbox.a */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		45E172455BD9D8364AA73930 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				1E257297354D9883E44F755A /* Pods-Smartbox.debug.xcconfig */,
-				571FE9C48DE93D996A0C6C0F /* Pods-Smartbox.release.xcconfig */,
-			);
-			name = Pods;
-			path = Pods;
-			sourceTree = "<group>";
-		};
-		4B7F7A73BF7F93F6B9404E69 /* Smartbox */ = {
-			isa = PBXGroup;
-			children = (
-				8453D1869E3536D56FC0BF36 /* ExpoModulesProvider.swift */,
-			);
-			name = Smartbox;
-			sourceTree = "<group>";
-		};
-		68B56AFADB09CF7DFE328361 /* ExpoModulesProviders */ = {
-			isa = PBXGroup;
-			children = (
-				4B7F7A73BF7F93F6B9404E69 /* Smartbox */,
-			);
-			name = ExpoModulesProviders;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -107,8 +81,8 @@
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				45E172455BD9D8364AA73930 /* Pods */,
-				68B56AFADB09CF7DFE328361 /* ExpoModulesProviders */,
+				89F9FC0AD0090DD077B76475 /* Pods */,
+				88AC7199FCDFA67A246B8EDD /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -123,6 +97,24 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		88AC7199FCDFA67A246B8EDD /* ExpoModulesProviders */ = {
+			isa = PBXGroup;
+			children = (
+				E5AEAA8D234DD9010D357E80 /* Smartbox */,
+			);
+			name = ExpoModulesProviders;
+			sourceTree = "<group>";
+		};
+		89F9FC0AD0090DD077B76475 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				4E6DF9CE6EEFAE8703A4DA94 /* Pods-Smartbox.debug.xcconfig */,
+				D74F3E41F7591B96538789E0 /* Pods-Smartbox.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		BB2F792B24A3F905000567C9 /* Supporting */ = {
 			isa = PBXGroup;
 			children = (
@@ -130,6 +122,14 @@
 			);
 			name = Supporting;
 			path = Smartbox/Supporting;
+			sourceTree = "<group>";
+		};
+		E5AEAA8D234DD9010D357E80 /* Smartbox */ = {
+			isa = PBXGroup;
+			children = (
+				A6E79B500FE11B75B28DD66A /* ExpoModulesProvider.swift */,
+			);
+			name = Smartbox;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -140,13 +140,13 @@
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Smartbox" */;
 			buildPhases = (
 				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
-				39ADFF583A32496972232BB5 /* [Expo] Configure project */,
+				1C2A367FDFA10F25E7FFCF50 /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
-				D8F10CB5056F9018ADE4224A /* [CP] Embed Pods Frameworks */,
+				46C6EA91EE2FFFFAAD2F38B1 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -196,7 +196,7 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				2350C68E55E0029882C3BCF1 /* PrivacyInfo.xcprivacy in Resources */,
+				D44327D9807AB5FC31558482 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -240,7 +240,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		39ADFF583A32496972232BB5 /* [Expo] Configure project */ = {
+		1C2A367FDFA10F25E7FFCF50 /* [Expo] Configure project */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -258,6 +258,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-Smartbox/expo-configure-project.sh\"\n";
+		};
+		46C6EA91EE2FFFFAAD2F38B1 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Smartbox/Pods-Smartbox-frameworks.sh",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Smartbox/Pods-Smartbox-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
 		};
 		800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -295,24 +313,6 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Smartbox/Pods-Smartbox-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		D8F10CB5056F9018ADE4224A /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Smartbox/Pods-Smartbox-frameworks.sh",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Smartbox/Pods-Smartbox-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -321,7 +321,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
-				9FC46A08FE57EE679DF80A83 /* ExpoModulesProvider.swift in Sources */,
+				9A6777CFFA855FD5D6CB8CC3 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -330,7 +330,7 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1E257297354D9883E44F755A /* Pods-Smartbox.debug.xcconfig */;
+			baseConfigurationReference = 4E6DF9CE6EEFAE8703A4DA94 /* Pods-Smartbox.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -366,7 +366,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 571FE9C48DE93D996A0C6C0F /* Pods-Smartbox.release.xcconfig */;
+			baseConfigurationReference = D74F3E41F7591B96538789E0 /* Pods-Smartbox.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
